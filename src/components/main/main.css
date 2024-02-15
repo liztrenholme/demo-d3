@@ -25,9 +25,6 @@ li {
     border-radius: 15px;
     border: solid 2px rgb(12, 21, 71);
 }
-.graph-3d {
-    height: 80em;
-}
 .button-container {
     display: flex;
     flex-direction: row;

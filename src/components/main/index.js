@@ -3,7 +3,8 @@ import React, { Component } from 'react';
 import {getData} from '../../lib/sdk';
 import './main.css';
 import Network from '../network';
-import Viz from '../graph3d/index';
+// import Viz from '../graph3d/index';
+import ForceGraph from '../graph3d/networkD3';
 
 class Main extends Component {
   state = {
@@ -14,15 +15,30 @@ class Main extends Component {
     availableStates: [],
     anchored: [],
     updating: false,
-    animationEnabled: true
+    animationEnabled: true,
+    page: 1
   };
 
   async componentDidMount() {
-    const data = await getData('USA');
-    if (data && data.statusCode === 200) {
-      const availableStates = [];
-      data.data.covid19Stats.forEach(i => availableStates.push(i.province));
-      this.setState({data: data.data, availableStates});
+    const data = await getData(this.state.page);
+    if (data && data.data) {
+      this.setState({data: data.data});
+    }
+  }
+
+
+  handleAddPage = () => {
+    const {page} = this.state;
+    this.setState({page: page + 1});
+    this.handleFetchData(page + 1);
+  }
+
+  handleFetchData = async (page) => {
+    const data = await getData(page);
+    const prevData = this.state.data;
+    if (data && data.data) {
+      const newData = prevData.concat(data.data);
+      this.setState({data: newData});
     }
   }
   clearViz = (e) => this.setState({stateMode: false, nationalMode: false, selectedState: e.currentTarget.value}, () => {
@@ -40,119 +56,81 @@ class Main extends Component {
 
   updateVis = () => this.setState({updating: true})
 
-  events = {
-    // select: (event) => {
-    //   var { nodes, edges } = event;
-    // },
-    dragStart: (event) => {
-      var { nodes } = event;
-      const temp = this.state.anchored;
-      const updated = temp.filter(node => node.id !== nodes[0]);
-      this.setState({anchored: updated});
-    },
-    dragEnd: (event) => {
-      var { nodes, edges, pointer } = event;
-      const temp = this.state.anchored;
-      if (nodes.length === 1 && edges.length > 1) {
-        return;
-      }
-      temp.push({id: nodes[0], x: pointer.canvas.x, y: pointer.canvas.y});
-      this.updateVis();
-      this.setState({anchored: temp, updating: false});
-    },
-    doubleClick: (event) => {
-      var { nodes } = event;
-      const temp = this.state.anchored;
-      const updated = temp.filter(node => node.id !== nodes[0]);
-      this.updateVis();
-      this.setState({anchored: updated, updating: false});
-    }
-  };
-
-
-  animationOn = {
-    barnesHut: {
-      gravitationalConstant: -12000,
-      // centralGravity: 0.9,
-      springLength: 95,
-      springConstant: 0.04,
-      damping: 1,
-      // avoidOverlap: 0.04
-    },
-    minVelocity: 0.07
-  }
-  toggleAnimation = () => this.state.animationEnabled 
-    ? this.setState({animationEnabled: false}) : this.setState({animationEnabled: true})
-
-  toggleMode = () => this.state.stateMode 
-    ? this.setState({stateMode: false, nationalMode: true})
-    : this.setState({stateMode: true, nationalMode: false});
   render() {
-    const { data, nationalMode, stateMode, selectedState, anchored, updating, animationEnabled } = this.state;
-    const stateStats = data && data.covid19Stats && data.covid19Stats.length 
-      ? data.covid19Stats.filter(i => i.province === selectedState) : [];
-    const stateNodes = stateStats.length 
-      ? stateStats.map(i => {
-        return({ 
-          id: `${i.city} ${i.province}`, 
-          label: `${i.city || ''} ${i.confirmed}`, 
+    const { data, stateMode } = this.state;
+    const nodesDivisions = {
+      Pacific: {
+        id: 'Pacific',
+        group: 'Pacific'        
+      }, 
+      Southwest: {
+        id: 'Southwest',
+        group: 'Southwest'
+      }, 
+      Atlantic: {
+        id: 'Atlantic',
+        group: 'Atlantic'
+      }, 
+      Central: {
+        id: 'Central',
+        group: 'Central'
+      }, 
+      Southeast: {
+        id: 'Southeast',
+        group: 'Southeast'
+      }, 
+      Northwest: {
+        id: 'Northwest',
+        group: 'Northwest',
+        name: 'Northwest',
+        label: 'Northwest'
+      }
+    };
+    const nodesForUse = [];
+    // eslint-disable-next-line no-unused-expressions
+    data && data.length 
+      ? data.forEach(i => {
+        nodesForUse.push({
+          id: i.id,
+          label: i.full_name,
           shape: 'circle',
           shadow: true,
           scaling: {min: 0, max: 100, label: {enabled: true}},
-          value: i.confirmed,
-          hidden: i.city === 'Unassigned' && i.confirmed === 0,
-          fixed: anchored.map(i => i.id).includes(`${i.city} ${i.province}`) ? 
-            {x: true, y: true} 
-            : {x: false, y: false},
-          selectNode: this.selectNode(i.id),
-          x: anchored.map(i => i.id).includes(`${i.city} ${i.province}`) ? 
-            Math.ceil(anchored.filter(j => j.id === `${i.city} ${i.province}`)[0].x)
-            : 0,
-          y: anchored.map(i => i.id).includes(`${i.city} ${i.province}`) ? 
-            Math.ceil(anchored.filter(j => j.id === `${i.city} ${i.province}`)[0].y)
-            : 0,
-          color: i.confirmed > 5000 ? '#964eba' 
-            : i.confirmed > 1000 ? '#ba4e66'
-              : i.confirmed > 500 ? '#f00' 
-                : i.confirmed > 100 ? 'orange' 
-                  : i.confirmed > 50 ? '#FFFF00' 
-                    : i.confirmed === 0 ? '#fff' 
-                      : '#fcfbd9' });}).concat([{id: selectedState, label: selectedState}]) : [];
-    const stateEdges = stateStats.length ? stateStats.map(i => {return({ from: i.province, to: `${i.city} ${i.province}`, hidden: i.city === 'Unassigned' && i.confirmed === 0, });}) : [];
-    let totalCases = 0;
-    let totalDeaths = 0;
-    stateStats.forEach(i => totalCases = totalCases + i.confirmed);
-    stateStats.forEach(i => totalDeaths = totalDeaths + i.deaths);
-    const states = data && data.covid19Stats && data.covid19Stats.length 
-      ? [...new Set(data.covid19Stats.map(i => {return(i.province);}))] : [];
-    states.sort();
-    const statesArray = states.map(i => {return({id: i, label: i});});
-    const allNodes = data && data.covid19Stats && data.covid19Stats.length 
-      ? data.covid19Stats.map(i => {return({ 
-        id: `${i.keyId} ${i.province}`, 
-        label: `${i.city || ''} ${i.confirmed}`, 
-        shape: 'circle',
-        shadow: true,
-        scaling: {min: 0, max: 100, label: {enabled: true}},
-        value: i.confirmed,
-        hidden: i.city === 'Unassigned' && i.confirmed === 0,
-        selectable: true,
-        color: i.confirmed > 5000 ? '#964eba' 
-          : i.confirmed > 1000 ? '#ba4e66' 
-            : i.confirmed > 500 ? '#f00' 
-              : i.confirmed > 100 ? 'orange' 
-                : i.confirmed > 50 ? '#FFFF00' 
-                  : i.confirmed === 0 ? '#fff' 
-                    : '#fcfbd9' });}).concat(statesArray) : [];
-    const allEdges = data && data.covid19Stats && data.covid19Stats.length 
-      ? data.covid19Stats.map(i => {return({ from: i.province, to: `${i.keyId} ${i.province}` });}) : [];
-    const dateUpdated = data && data.lastChecked 
-      ? `${data.lastChecked.split('T')[0]}, ${data.lastChecked.split('T')[1].split('.')[0]}` : 'fetching...';
+          selectable: true,
+          color: 'orange',
+          name: i.name,
+          conference: i.conference,
+          city: i.city,
+          abbreviation: i.abbreviation,
+          division: i.division,
+          group: i.division
+        });
+      })
+      : null;
+    Object.keys(nodesDivisions).forEach(i => {
+      nodesForUse.push(nodesDivisions[i]);
+    });
+
+    const allEdges = data && data.length 
+      ? data.map(i => {return({ source: i.division, target: i.id, value: 2 });}) : [];
+    const edges = allEdges;
+    const chart = ForceGraph({nodes: nodesForUse, links: edges}, {
+      nodeId: d => d.id,
+      nodeGroup: d => d.group,
+      nodeTitle: d => `${d.name}\n${d.group}`,
+      linkStrokeWidth: l => Math.sqrt(l.value),
+      width: window.innerWidth,
+      height: window.innerHeight,
+      invalidation: () => ({then: (d) => console.log(d)}) // a promise to stop the simulation when the cell is re-run
+    });
+    console.log('ugh', chart);
     return (
       <div className="main">
         <div className="main-layout">
           <div className="graph-3d">
-            <Viz />
+            {/* <div dangerouslySetInnerHTML={{__html: svg}} /> */}
+            {chart}
+            {/* {svg} */}
           </div>
         </div>
         {/* <footer>Data source: Johns Hopkins University via RapidAPI</footer> */}
