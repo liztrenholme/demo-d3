@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Copyright 2021-2023 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/force-directed-graph
@@ -8,10 +9,14 @@ import {
   forceLink,
   forceManyBody,
   forceSimulation,
-  // forceCollide,
-  // forceX,
-  // forceY,
+  forceCollide,
+  forceX,
+  forceY,
+  // forceProperties,
 } from 'd3-force';
+import { zoom, zoomidentity } from 'd3-zoom';
+import {drag} from 'd3-drag';
+import {selection} from 'd3-selection';
 import React from 'react';
 
 function createMarkup(html) {
@@ -46,7 +51,7 @@ function createMarkup(html) {
 //     .attr('style', 'max-width: 100%; height: auto;');
 
 //   // // **************************
-//   // var myCircles = svg.selectAll('circle')
+//   // let myCircles = svg.selectAll('circle')
 //   //   .data([32, 57, 112, 293]);//binds the data
     
 //   // myCircles.enter().append('circle');//enter selection
@@ -191,6 +196,13 @@ export default function ForceGraph(data, {
   height = 400, // outer height, in pixels
   // invalidation // when this promise resolves, stop the simulation
 } = {}) {
+  console.log('what are all of these???',
+    nodeGroup,
+    nodeGroups,
+    nodeStrength,
+    linkStrength,
+    nodeTitle,
+    data);
   // Compute values.
   const N = d3.map(data.nodes, nodeId).map(intern);
   const LS = d3.map(data.links, linkSource).map(intern);
@@ -230,7 +242,11 @@ export default function ForceGraph(data, {
     .attr('width', width)
     .attr('height', height)
     .attr('viewBox', [-width / 2, -height / 2, width, height])
-    .attr('style', 'max-width: 100%; height: auto; height: intrinsic;');
+    .attr('style', 'max-width: 100%; height: auto;')
+    .call(zoom().on('zoom', (event) => {   // <-- `event` argument
+      console.log('hello hello is this thing on?');
+      svg.attr('transform', event.transform); // <-- use `event` here
+    }));
   
   const link = svg.append('g')
     .attr('stroke', typeof linkStroke !== 'function' ? linkStroke : null)
@@ -294,7 +310,7 @@ export default function ForceGraph(data, {
         .selection()
         // .call(drag(simulation))
         .call(
-          d3.drag().on('drag', function (evt) {
+          drag().on('drag', function (evt) {
             node.attr('cx', evt.x).attr('cy', evt.y);
           })
         )
@@ -308,7 +324,7 @@ export default function ForceGraph(data, {
         // .call(drag(simulation))
         .on('click', (d) => console.log('d', d))
         .call(
-          d3.drag().on('drag', function (evt) {
+          drag().on('drag', function (evt) {
             node.attr('cx', evt.x).attr('cy', evt.y);
           })
         ),
@@ -325,7 +341,7 @@ export default function ForceGraph(data, {
     .text(d => d.id);
 
   // Add a drag behavior.
-  node.call(d3.drag()
+  node.call(drag()
     .on('start', dragstarted)
     .on('drag', dragged)
     .on('end', dragended));
@@ -356,7 +372,7 @@ export default function ForceGraph(data, {
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
       .call(
-        d3.drag().on('drag', function (evt) {
+        drag().on('drag', function (evt) {
           node.attr('cx', evt.x).attr('cy', evt.y);
         })
       );
@@ -431,12 +447,223 @@ export default function ForceGraph(data, {
     .attr('fill', 'black');
   
   c.call(
-    d3.drag().on('drag', function (evt) {
+    drag().on('drag', function (evt) {
       console.log('event', evt);
       c.attr('cx', evt.x).attr('cy', evt.y);
     })
+    // drag().on('drag', function(evt) {
+    //   d3.select(this).attr('transform', 'translate(' + (c.x = evt.x) + ',' + (c.y = evt.y) + ')');
+    // })
   );
-  // console.log('JJJJJJJJJ', svg);
+  console.log('c???', c);
+  // const svg = d3.create('svg')
+  //   .attr('width', width)
+  //   .attr('height', height)
+  //   .attr('viewBox', [-width / 2, -height / 2, width, height])
+  //   .attr('style', 'max-width: 100%; height: auto; height: intrinsic;');
+  // // width = +svg.node().getBoundingClientRect().width,
+  // // height = +svg.node().getBoundingClientRect().height;
+
+  // // svg objects
+  // let link;
+  // let node;
+  // // the data - an object with nodes and links
+  // let graph = data;
+
+  // // load the data
+  // // d3.json('miserables.json', function(error, _graph) {
+  // //   if (error) throw error;
+  // //   graph = _graph;
+  // //   initializeDisplay();
+  // //   initializeSimulation();
+  // // });
+
+
+
+  // //////////// FORCE SIMULATION //////////// 
+
+  // // force simulator
+  // let simulation = d3.forceSimulation();
+
+  // // set up the simulation and event to update locations after each tick
+  // function initializeSimulation() {
+  //   simulation.nodes(graph.nodes);
+  //   initializeForces();
+  //   simulation.on('tick', ticked);
+  // }
+
+  // // values for all forces
+  // const forceProperties = {
+  //   center: {
+  //     x: 0.5,
+  //     y: 0.5
+  //   },
+  //   charge: {
+  //     enabled: true,
+  //     strength: -30,
+  //     distanceMin: 1,
+  //     distanceMax: 2000
+  //   },
+  //   collide: {
+  //     enabled: true,
+  //     strength: .7,
+  //     iterations: 1,
+  //     radius: 5
+  //   },
+  //   forceX: {
+  //     enabled: false,
+  //     strength: .1,
+  //     x: .5
+  //   },
+  //   forceY: {
+  //     enabled: false,
+  //     strength: .1,
+  //     y: .5
+  //   },
+  //   link: {
+  //     enabled: true,
+  //     distance: 30,
+  //     iterations: 1
+  //   }
+  // };
+
+  // // add forces to the simulation
+  // function initializeForces() {
+  //   // add forces and associate each with a name
+  //   simulation
+  //     .force('link', forceLink())
+  //     .force('charge', forceManyBody())
+  //     .force('collide', forceCollide())
+  //     .force('center', forceCenter())
+  //     .force('forceX', forceX())
+  //     .force('forceY', forceY());
+  //   // apply properties to each of the forces
+  //   updateForces();
+  // }
+
+  // // apply new force properties
+  // function updateForces() {
+  //   // get each force by name and update the properties
+  //   simulation.force('center')
+  //     .x(width * forceProperties.center.x)
+  //     .y(height * forceProperties.center.y);
+  //   simulation.force('charge')
+  //     .strength(forceProperties.charge.strength * forceProperties.charge.enabled)
+  //     .distanceMin(forceProperties.charge.distanceMin)
+  //     .distanceMax(forceProperties.charge.distanceMax);
+  //   simulation.force('collide')
+  //     .strength(forceProperties.collide.strength * forceProperties.collide.enabled)
+  //     .radius(forceProperties.collide.radius)
+  //     .iterations(forceProperties.collide.iterations);
+  //   simulation.force('forceX')
+  //     .strength(forceProperties.forceX.strength * forceProperties.forceX.enabled)
+  //     .x(width * forceProperties.forceX.x);
+  //   simulation.force('forceY')
+  //     .strength(forceProperties.forceY.strength * forceProperties.forceY.enabled)
+  //     .y(height * forceProperties.forceY.y);
+  //   simulation.force('link')
+  //     .id(function(d) {return d.id;})
+  //     .distance(forceProperties.link.distance)
+  //     .iterations(forceProperties.link.iterations)
+  //     .links(forceProperties.link.enabled ? graph.links : []);
+
+  //   // updates ignored until this is run
+  //   // restarts the simulation (important if simulation has already slowed down)
+  //   simulation.alpha(1).restart();
+  // }
+
+
+
+  // //////////// DISPLAY ////////////
+
+  // // generate the svg objects and force simulation
+  // function initializeDisplay() {
+  // // set the data and properties of link lines
+  //   link = svg.append('g')
+  //     .attr('class', 'links')
+  //     .selectAll('line')
+  //     .data(graph.links)
+  //     .enter().append('line');
+
+  //   // set the data and properties of node circles
+  //   node = svg.append('g')
+  //     .attr('class', 'nodes')
+  //     .selectAll('circle')
+  //     .data(graph.nodes)
+  //     .enter().append('circle')
+  //     .call(d3.drag()
+  //       .on('start', dragstarted)
+  //       .on('drag', dragged)
+  //       .on('end', dragended));
+
+  //   // node tooltip
+  //   node.append('title')
+  //     .text(function(d) { return d.id; });
+  //   // visualize the graph
+  //   updateDisplay();
+  // }
+
+  // // update the display based on the forces (but not positions)
+  // function updateDisplay() {
+  //   node
+  //     .attr('r', forceProperties.collide.radius)
+  //     .attr('stroke', forceProperties.charge.strength > 0 ? 'blue' : 'red')
+  //     .attr('stroke-width', forceProperties.charge.enabled==false ? 0 : Math.abs(forceProperties.charge.strength)/15);
+
+  //   link
+  //     .attr('stroke-width', forceProperties.link.enabled ? 1 : .5)
+  //     .attr('opacity', forceProperties.link.enabled ? 1 : 0);
+  // }
+
+  // // update the display positions after each simulation tick
+  // function ticked() {
+  //   link
+  //     .attr('x1', function(d) { return d.source.x; })
+  //     .attr('y1', function(d) { return d.source.y; })
+  //     .attr('x2', function(d) { return d.target.x; })
+  //     .attr('y2', function(d) { return d.target.y; });
+
+  //   node
+  //     .attr('cx', function(d) { return d.x; })
+  //     .attr('cy', function(d) { return d.y; });
+  //   d3.select(svg).style('flex-basis', (simulation.alpha()*100) + '%');
+  // }
+
+
+
+  // //////////// UI EVENTS ////////////
+
+  // function dragstarted(event, d) {
+  //   if (!event.active) simulation.alphaTarget(0.3).restart();
+  //   d.fx = d.x;
+  //   d.fy = d.y;
+  // }
+
+  // function dragged(event, d) {
+  //   console.log('event is...', event);
+  //   d.fx = event.x;
+  //   d.fy = event.y;
+  // }
+
+  // function dragended(event, d) {
+  //   if (!event.active) simulation.alphaTarget(0.0001);
+  //   d.fx = null;
+  //   d.fy = null;
+  // }
+
+  // // update size-related forces
+  // d3.select(window).on('resize', function(){
+  //   width = +svg.node().getBoundingClientRect().width;
+  //   height = +svg.node().getBoundingClientRect().height;
+  //   updateForces();
+  // });
+
+  // // convenience function to update everything (run after UI input)
+  // function updateAll() {
+  //   updateForces();
+  //   updateDisplay();
+  // }
+  // console.log('svg???', svg);
   return (
   //   <div
   //  dangerouslySetInnerHTML={createMarkup(

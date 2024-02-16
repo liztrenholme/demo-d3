@@ -1,7 +1,8 @@
 import 'whatwg-fetch';
+import API from './env';
 
 export const getData = async (page) => {
-  console.log('page is...', page)
+  console.log('page is...', page);
   const url = `https://free-nba.p.rapidapi.com/teams?page=${page}`;
 
   let data = {};
@@ -11,11 +12,11 @@ export const getData = async (page) => {
       'headers': {
         'Content-Type': 'application/json',
         'x-rapidapi-host': 'free-nba.p.rapidapi.com',
-        'x-rapidapi-key': 'ca93407b12msh6207f84fb92a18ep1d6b56jsn4ab719b2e4d0'
+        'x-rapidapi-key': API.API_KEY
       }
     })
       .then(blob => blob.json());
-  console.log('data...', data)
+    console.log('data...', data);
     return(data);
   } catch (e) {
     // eslint-disable-next-line no-console
