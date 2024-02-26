@@ -56,7 +56,7 @@ select {
     border-radius: 5px;
     border: solid 2px rgb(12, 21, 71);
 }
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1800px) {
     .main {
         margin: .5em;
         padding: 1em;

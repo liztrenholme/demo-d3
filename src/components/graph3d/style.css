@@ -1,3 +1,11 @@
 h1, p {
     font-family: Lato;
   }
+.context-info {
+  position: absolute;
+  background-color: #ffffff;
+  padding: 0.1em 0.5em;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+}

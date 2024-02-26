@@ -1,0 +1,106 @@
+{
+    "Sun": {
+            "jd": 2456824.134176539,
+            "iso_date": "2014-06-15 15:13:13",
+            "position": {
+              "absolute_degrees": 84.4461683293164,
+              "sign": "Gemini",
+              "deg": 24.446168329316393,
+              "min": 26.770099758983577,
+              "sec": 46.20598553901459,
+              "rel_tuple": [
+                "Gemini",
+                24,
+                26,
+                46
+              ]
+            },
+            "dignity": null,
+            "next_rise": {
+              "description": "Sun rises",
+              "jd": 2456824.6131326826,
+              "iso_date": "2014-06-16 02:42:55",
+              "delta_days": 0.47895566932857037
+            },
+            "next_set": {
+              "description": "Sun sets",
+              "jd": 2456824.3136996096,
+              "iso_date": "2014-06-15 19:31:44",
+              "delta_days": 0.17952257301658392
+            },
+            "last_rise": {
+              "description": "Sun rises",
+              "jd": 2456823.613199758,
+              "iso_date": "2014-06-15 02:43:00",
+              "delta_days": -0.5209773005917668
+            },
+            "last_set": {
+              "description": "Sun sets",
+              "jd": 2456823.3133264054,
+              "iso_date": "2014-06-14 19:31:11",
+              "delta_days": -0.8208506754599512
+            }
+    },
+"Moon": {
+    "jd": 2456824.1345874695,
+    "iso_date": "2014-06-15 15:13:48",
+    "position": {
+      "absolute_degrees": 298.61998474401037,
+      "sign": "Capricorn",
+      "deg": 28.619984744010367,
+      "min": 37.199084640622004,
+      "sec": 11.945078437320262,
+      "rel_tuple": [
+        "Capricorn",
+        28,
+        37,
+        11
+      ]
+    },
+    "phase": {
+      "trend": "waning",
+      "shape": "gibbous",
+      "quarter": null,
+      "quarter_english": null
+    },
+    "illumination": 0.810147644249792,
+    "distance": 0.002421304221721279,
+    "diameter": 32.99276341691477,
+    "diameter_ratio": 0.7693257118572435,
+    "speed": 14.890501719057983,
+    "speed_ratio": 1.0282817872056198,
+    "age": 17.856658097356558,
+    "period_length": 29.56128417328,
+    "dignity": "detriment",
+    "next_new_moon": {
+      "description": "Upcoming new moon in Cancer",
+      "jd": 2456835.8392135454,
+      "iso_date": "2014-06-27 08:08:28",
+      "delta_days": 11.704618663527071
+    },
+    "next_full_moon": {
+      "description": "Upcoming full moon in Capricorn",
+      "jd": 2456850.9756300217,
+      "iso_date": "2014-07-12 11:24:54",
+      "delta_days": 26.84103513136506
+    },
+    "next_new_or_full_moon": {
+      "description": "Upcoming new moon in Cancer",
+      "jd": 2456835.8392135454,
+      "iso_date": "2014-06-27 08:08:28",
+      "delta_days": 11.704618647228926
+    },
+    "last_new_moon": {
+      "description": "Preceding new moon in Gemini",
+      "jd": 2456806.277929372,
+      "iso_date": "2014-05-28 18:40:13",
+      "delta_days": -17.856665534432977
+    },
+    "last_full_moon": {
+      "description": "Preceding full moon in Sagittarius",
+      "jd": 2456821.6746404273,
+      "iso_date": "2014-06-13 04:11:29",
+      "delta_days": -2.459954487159848
+    }
+  }
+}
